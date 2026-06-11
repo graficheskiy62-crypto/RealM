@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>РеалМ — Социальная сеть реальных действий</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #0000ff;
+            --primary-magenta: #ff00ff;
+            --gradient-main: linear-gradient(135deg, var(--primary-blue), var(--primary-magenta));
+            --bg-dark: #0a0a0f;
+            --surface: rgba(255, 255, 255, 0.05);
+            --surface-hover: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --text-muted: #a0a0b0;
+            --border: rgba(255, 255, 255, 0.1);
+            --radius-lg: 24px;
+            --radius-md: 16px;
+            --radius-sm: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Background Effects */
+        .ambient-glow {
+            position: fixed;
+            top: -20%;
+            left: -10%;
+            width: 60vw;
+            height: 60vw;
+            background: radial-gradient(circle, rgba(0,0,255,0.15) 0%, transparent 70%);
+            z-index: -1;
+            pointer-events: none;
+        }
+        
+        .ambient-glow-2 {
+            position: fixed;
+            bottom: -20%;
+            right: -10%;
+            width: 60vw;
+            height: 60vw;
+            background: radial-gradient(circle, rgba(255,0,255,0.15) 0%, transparent 70%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Typography & Utilities */
+        h1, h2, h3 { line-height: 1.2; }
+        .gradient-text {
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 28px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            outline: none;
+            text-decoration: none;
+        }
+        .btn-primary {
+            background: var(--gradient-main);
+            color: white;
+            box-shadow: 0 4px 20px rgba(0,0,255,0.3);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255,0,255,0.4);
+        }
+        .btn-secondary {
+            background: var(--surface);
+            color: white;
+            border: 1px solid var(--border);
+        }
+        .btn-secondary:hover {
+            background: var(--surface-hover);
+        }
+
+        /* Header */
+        header {
+            padding: 20px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border);
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--gradient-main);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 80px 5% 40px;
+            text-align: center;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .hero h1 {
+            font-size: clamp(40px, 5vw, 64px);
+            margin-bottom: 20px;
+            font-weight: 800;
+        }
+        .hero p {
+            font-size: clamp(18px, 2vw, 22px);
+            color: var(--text-muted);
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        /* App Demo Container */
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto 80px;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 300px 1fr 300px;
+            gap: 20px;
+            height: 700px;
+        }
+
+        @media (max-width: 1024px) {
+            .app-container {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+            .panel {
+                height: 500px;
+            }
+        }
+
+        /* Panels */
+        .panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .panel-header {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Left Panel: Stats/Profile */
+        .profile-card {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .avatar-large {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #333, #555);
+            margin: 0 auto 15px;
+            border: 2px solid var(--primary-magenta);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .stat-box {
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+        .stat-val {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-blue);
+        }
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+
+        /* Center Panel: Map */
+        .map-view {
+            flex-grow: 1;
+            background: #111;
+            border-radius: var(--radius-md);
+            position: relative;
+            overflow: hidden;
+            background-image: 
+                radial-gradient(#222 1px, transparent 1px),
+                radial-gradient(#222 1px, transparent 1px);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+        }
+        
+        .map-pin {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-main);
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(255,0,255,0.5);
+            animation: pulse 2s infinite;
+            cursor: pointer;
+        }
+        .map-pin span {
+            transform: rotate(45deg);
+            font-size: 18px;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255,0,255,0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(255,0,255,0); }
+            100% { box-shadow: 0 0 0 0 rgba(255,0,255,0); }
+        }
+
+        .active-quest-modal {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(10, 10, 15, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--primary-blue);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            transform: translateY(120%);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .active-quest-modal.show {
+            transform: translateY(0);
+        }
+
+        /* Right Panel: Feed */
+        .feed-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+        .feed-item {
+            background: rgba(255,255,255,0.03);
+            padding: 15px;
+            border-radius: var(--radius-md);
+            border-left: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        .feed-item.new {
+            border-left-color: var(--primary-magenta);
+            background: rgba(255,0,255,0.05);
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .feed-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .feed-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #444;
+        }
+        .feed-name { font-size: 14px; font-weight: 600; }
+        .feed-time { font-size: 12px; color: var(--text-muted); margin-left: auto; }
+        .feed-content { font-size: 14px; line-height: 1.5; color: #ddd; }
+        .feed-tag {
+            display: inline-block;
+            font-size: 11px;
+            padding: 4px 8px;
+            background: rgba(0,0,255,0.2);
+            color: #8888ff;
+            border-radius: 20px;
+            margin-top: 10px;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+        /* Footer */
+        footer {
+            margin-top: auto;
+            padding: 40px 5%;
+            text-align: center;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-glow"></div>
+    <div class="ambient-glow-2"></div>
+
+    <header>
+        <div class="logo">
+            <div class="logo-icon">RM</div>
+            РеалМ
+        </div>
+        <nav style="display: flex; gap: 20px;">
+            <a href="#" class="btn btn-secondary" style="padding: 10px 20px; font-size: 14px;">О проекте</a>
+            <a href="#" class="btn btn-primary" style="padding: 10px 20px; font-size: 14px;">Скачать Beta</a>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h1>Выйди из ленты.<br><span class="gradient-text">Начни жить.</span></h1>
+        <p>Первая социальная сеть, где контент создается только после реального действия. Находи микро-квесты рядом, собирай команду и получай награды за живой опыт.</p>
+    </section>
+
+    <main class="app-container">
+        <!-- Left: Profile & Stats -->
+        <aside class="panel">
+            <div class="panel-header">Профиль</div>
+            <div class="profile-card">
+                <div class="avatar-large">👤</div>
+                <h3 style="margin-bottom: 5px;">Алексей В.</h3>
+                <p style="font-size: 12px; color: var(--text-muted);">Исследователь • Уровень 12</p>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-val" id="xp-count">1,240</div>
+                    <div class="stat-label">XP очков</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-val">8</div>
+                    <div class="stat-label">Квестов</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-val">3</div>
+                    <div class="stat-label">Друзья рядом</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-val">12%</div>
+                    <div class="stat-label">До след. уровня</div>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px; padding: 15px; background: rgba(0,0,255,0.1); border-radius: 12px; border: 1px solid rgba(0,0,255,0.3);">
+                <p style="font-size: 12px; color: #aaa; margin-bottom: 5px;">Текущий бейдж:</p>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 24px;">🏃‍♂️</span>
+                    <div>
+                        <div style="font-weight: 600; font-size: 14px;">Активный ходок</div>
+                        <div style="font-size: 11px; color: var(--primary-blue);">Пройдено 15 км за неделю</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Center: Interactive Map -->
+        <section class="panel" style="padding: 0; border: none; background: transparent;">
+            <div class="map-view" id="map-area">
+                <div class="panel-header" style="position: absolute; top: 20px; left: 20px; z-index: 10; background: rgba(0,0,0,0.6); padding: 8px 16px; border-radius: 20px; backdrop-filter: blur(5px);">
+                    📍 Район: Василеостровский
+                </div>
+                
+                <!-- Pins -->
+                <div class="map-pin" style="top: 30%; left: 40%;" onclick="activateQuest('jazz')">
+                    <span>🎷</span>
+                </div>
+                <div class="map-pin" style="top: 60%; left: 70%; background: linear-gradient(135deg, #ff00ff, #ff0055);" onclick="activateQuest('coffee')">
+                    <span></span>
+                </div>
+                <div class="map-pin" style="top: 20%; left: 80%; background: linear-gradient(135deg, #00ffff, #0000ff);" onclick="activateQuest('art')">
+                    <span>🎨</span>
+                </div>
+
+                <!-- Quest Modal -->
+                <div class="active-quest-modal" id="quest-modal">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                        <div>
+                            <h3 style="margin-bottom: 5px;" id="modal-title">Название квеста</h3>
+                            <p style="font-size: 13px; color: #ccc;" id="modal-desc">Описание задания...</p>
+                        </div>
+                        <div style="background: var(--primary-magenta); padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold;">+150 XP</div>
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%;" onclick="completeQuest()">
+                         Я здесь! Выполнить
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right: Live Feed -->
+        <aside class="panel">
+            <div class="panel-header">
+                Лента действий
+                <span style="font-size: 10px; background: var(--primary-blue); padding: 2px 6px; border-radius: 10px; color: white;">LIVE</span>
+            </div>
+            <div class="feed-list" id="feed-container">
+                <!-- Initial Items -->
+                <div class="feed-item">
+                    <div class="feed-user">
+                        <div class="feed-avatar" style="background: #e91e63;"></div>
+                        <div class="feed-name">Мария К.</div>
+                        <div class="feed-time">2 мин</div>
+                    </div>
+                    <div class="feed-content">Нашла скрытый дворик на 8-й линии! Там потрясающий стрит-арт.</div>
+                    <div class="feed-tag">#Исследователь</div>
+                </div>
+                <div class="feed-item">
+                    <div class="feed-user">
+                        <div class="feed-avatar" style="background: #2196f3;"></div>
+                        <div class="feed-name">Дмитрий С.</div>
+                        <div class="feed-time">15 мин</div>
+                    </div>
+                    <div class="feed-content">Посетил лекцию по урбанистике в "Подвале". Очень полезно.</div>
+                    <div class="feed-tag">#Знания</div>
+                </div>
+                <div class="feed-item">
+                    <div class="feed-user">
+                        <div class="feed-avatar" style="background: #ff9800;"></div>
+                        <div class="feed-name">Анна В.</div>
+                        <div class="feed-time">32 мин</div>
+                    </div>
+                    <div class="feed-content">Собрала компанию для пробежки вокруг Смоленки. Было круто!</div>
+                    <div class="feed-tag">#Спорт</div>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <footer>
+        <p>© 2026 РеалМ. Демо-версия для GitHub Pages.</p>
+        <p style="margin-top: 10px; font-size: 12px; opacity: 0.6;">Концепция социальной сети реальных действий.</p>
+    </footer>
+
+    <script>
+        // Data for quests
+        const quests = {
+            'jazz': {
+                title: 'Джаз в подвале',
+                desc: 'Приди на Лиговский пр., 50. Найди вход во двор, спустись вниз. Покажи фото саксофона бармену.',
+                xp: 150
+            },
+            'coffee': {
+                title: 'Утренний раф',
+                desc: 'Кофейня "Зерно" на углу. Закажи новый сезонный раф и оставь честный отзыв в приложении до 12:00.',
+                xp: 100
+            },
+            'art': {
+                title: 'Поиск граффити',
+                desc: 'Найди мурал с изображением космонавта на стене дома 14. Сделай креативное фото на его фоне.',
+                xp: 200
+            }
+        };
+
+        let currentQuestId = null;
+
+        function activateQuest(id) {
+            currentQuestId = id;
+            const quest = quests[id];
+            const modal = document.getElementById('quest-modal');
+            
+            document.getElementById('modal-title').innerText = quest.title;
+            document.getElementById('modal-desc').innerText = quest.desc;
+            
+            modal.classList.add('show');
+        }
+
+        function completeQuest() {
+            if (!currentQuestId) return;
+            
+            const modal = document.getElementById('quest-modal');
+            modal.classList.remove('show');
+            
+            // Update XP
+            const xpEl = document.getElementById('xp-count');
+            let currentXp = parseInt(xpEl.innerText.replace(',', ''));
+            currentXp += quests[currentQuestId].xp;
+            xpEl.innerText = currentXp.toLocaleString();
+
+            // Add to feed
+            addFeedItem(quests[currentQuestId]);
+            
+            // Reset
+            currentQuestId = null;
+        }
+
+        function addFeedItem(questData) {
+            const container = document.getElementById('feed-container');
+            const newItem = document.createElement('div');
+            newItem.className = 'feed-item new';
+            
+            const now = new Date();
+            const timeString = "Только что";
+            
+            newItem.innerHTML = `
+                <div class="feed-user">
+                    <div class="feed-avatar" style="background: linear-gradient(135deg, #0000ff, #ff00ff);"></div>
+                    <div class="feed-name">Вы (Алексей)</div>
+                    <div class="feed-time">${timeString}</div>
+                </div>
+                <div class="feed-content">Выполнил квест: "${questData.title}". ${questData.desc.substring(0, 40)}...</div>
+                <div class="feed-tag" style="background: rgba(255,0,255,0.2); color: #ff88ff;">#Действие</div>
+            `;
+            
+            container.insertBefore(newItem, container.firstChild);
+            
+            // Remove animation class after it plays
+            setTimeout(() => {
+                newItem.classList.remove('new');
+            }, 1000);
+        }
+
+        // Simulate random incoming activity from others
+        setInterval(() => {
+            if(Math.random() > 0.7) {
+                const names = ['Олег П.', 'Света М.', 'Иван К.', 'Лена Д.'];
+                const actions = [
+                    'Нашел отличную книжную лавку.',
+                    'Покормил белок в парке.',
+                    'Посетил выставку современного искусства.',
+                    'Выпил лучший матча-латте в городе.'
+                ];
+                const tags = ['#Еда', '#Природа', '#Культура', '#Отдых'];
+                
+                const randName = names[Math.floor(Math.random() * names.length)];
+                const randAction = actions[Math.floor(Math.random() * actions.length)];
+                const randTag = tags[Math.floor(Math.random() * tags.length)];
+                
+                const container = document.getElementById('feed-container');
+                const newItem = document.createElement('div');
+                newItem.className = 'feed-item new';
+                
+                newItem.innerHTML = `
+                    <div class="feed-user">
+                        <div class="feed-avatar" style="background: #666;"></div>
+                        <div class="feed-name">${randName}</div>
+                        <div class="feed-time">Сейчас</div>
+                    </div>
+                    <div class="feed-content">${randAction}</div>
+                    <div class="feed-tag">${randTag}</div>
+                `;
+                
+                container.insertBefore(newItem, container.firstChild);
+                
+                // Keep list length manageable
+                if(container.children.length > 10) {
+                    container.removeChild(container.lastChild);
+                }
+                
+                setTimeout(() => newItem.classList.remove('new'), 1000);
+            }
+        }, 5000);
+
+    </script>
+</body>
+</html>
+
