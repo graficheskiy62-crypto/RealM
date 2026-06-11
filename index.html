@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>РеалМ — Демо приложения</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #0000ff;
+            --primary-magenta: #ff00ff;
+            --gradient-main: linear-gradient(135deg, var(--primary-blue), var(--primary-magenta));
+            --bg-dark: #0a0a0f;
+            --surface: rgba(255, 255, 255, 0.05);
+            --surface-hover: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --text-muted: #a0a0b0;
+            --border: rgba(255, 255, 255, 0.1);
+            --radius-lg: 24px;
+            --radius-md: 16px;
+            --radius-sm: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(0,0,255,0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(255,0,255,0.15) 0%, transparent 50%);
+        }
+
+        /* Phone Frame */
+        .phone-frame {
+            width: 100%;
+            max-width: 420px;
+            height: 90vh;
+            max-height: 850px;
+            background: var(--bg-dark);
+            border-radius: 40px;
+            border: 8px solid #1a1a2e;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 2px rgba(255,255,255,0.05);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (max-width: 480px) {
+            body { padding: 0; }
+            .phone-frame {
+                border-radius: 0;
+                border: none;
+                height: 100vh;
+                max-height: none;
+            }
+        }
+
+        /* Status Bar */
+        .status-bar {
+            padding: 12px 24px 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        .status-icons {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        /* App Header */
+        .app-header {
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .header-title {
+            font-size: 24px;
+            font-weight: 800;
+        }
+        .header-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--surface);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid var(--border);
+        }
+        .header-icon:hover {
+            background: var(--surface-hover);
+        }
+
+        /* Main Content Area */
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 0 20px 20px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateX(20px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+        }
+
+        .screen.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0);
+        }
+
+        .screen::-webkit-scrollbar { width: 0; }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            padding: 12px 20px 20px;
+            background: rgba(10, 10, 15, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-shrink: 0;
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            flex: 1;
+        }
+
+        .nav-icon {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            transition: all 0.3s;
+            color: var(--text-muted);
+        }
+
+        .nav-label {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-muted);
+            transition: all 0.3s;
+        }
+
+        .nav-item.active .nav-icon {
+            color: var(--primary-magenta);
+            transform: translateY(-2px);
+        }
+
+        .nav-item.active .nav-label {
+            color: var(--primary-magenta);
+            font-weight: 600;
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            background: var(--gradient-main);
+            border-radius: 50%;
+        }
+
+        /* Profile Screen */
+        .profile-header {
+            text-align: center;
+            padding: 20px 0 30px;
+        }
+        .avatar-large {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #333, #555);
+            margin: 0 auto 16px;
+            border: 3px solid transparent;
+            background-image: linear-gradient(#444, #444), var(--gradient-main);
+            background-origin: border-box;
+            background-clip: content-box, border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+        .profile-name {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .profile-level {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .xp-bar-container {
+            background: var(--surface);
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        .xp-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+        .xp-progress {
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .xp-fill {
+            height: 100%;
+            background: var(--gradient-main);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+            width: 62%;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .stat-box {
+            background: var(--surface);
+            padding: 16px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+        }
+        .stat-val {
+            font-size: 28px;
+            font-weight: 700;
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .badge-card {
+            background: linear-gradient(135deg, rgba(0,0,255,0.1), rgba(255,0,255,0.1));
+            border: 1px solid rgba(255,0,255,0.3);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .badge-icon {
+            font-size: 36px;
+        }
+        .badge-info h4 {
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+        .badge-info p {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Map Screen */
+        .map-container {
+            background: #111;
+            border-radius: var(--radius-lg);
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+            background-image: 
+                radial-gradient(#222 1px, transparent 1px),
+                radial-gradient(#222 1px, transparent 1px);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+        }
+
+        .map-location {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(10px);
+            padding: 10px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .map-pin {
+            position: absolute;
+            width: 44px;
+            height: 44px;
+            background: var(--gradient-main);
+            border-radius: 50% 50% 50% 0;
+            transform: rotate(-45deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(255,0,255,0.5);
+            animation: pulse 2s infinite;
+            cursor: pointer;
+            z-index: 5;
+        }
+        .map-pin span {
+            transform: rotate(45deg);
+            font-size: 20px;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255,0,255,0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(255,0,255,0); }
+            100% { box-shadow: 0 0 0 0 rgba(255,0,255,0); }
+        }
+
+        .quest-modal {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 10, 15, 0.95);
+            backdrop-filter: blur(20px);
+            border-top: 2px solid var(--primary-blue);
+            padding: 24px;
+            border-radius: 24px 24px 0 0;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 20;
+        }
+        .quest-modal.show {
+            transform: translateY(0);
+        }
+        .quest-modal h3 {
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+        .quest-modal p {
+            font-size: 14px;
+            color: #ccc;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .quest-reward {
+            display: inline-block;
+            background: var(--gradient-main);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            border-radius: 16px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            outline: none;
+            text-align: center;
+        }
+        .btn-primary {
+            background: var(--gradient-main);
+            color: white;
+            box-shadow: 0 4px 20px rgba(0,0,255,0.3);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255,0,255,0.4);
+        }
+        .btn-secondary {
+            background: var(--surface);
+            color: white;
+            border: 1px solid var(--border);
+            margin-top: 10px;
+        }
+
+        /* Feed Screen */
+        .feed-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .feed-item {
+            background: var(--surface);
+            padding: 16px;
+            border-radius: var(--radius-md);
+            border-left: 3px solid transparent;
+            transition: all 0.3s;
+            border: 1px solid var(--border);
+        }
+        .feed-item.new {
+            border-left-color: var(--primary-magenta);
+            background: rgba(255,0,255,0.05);
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .feed-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .feed-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        .feed-name { font-size: 14px; font-weight: 600; }
+        .feed-time { font-size: 12px; color: var(--text-muted); margin-left: auto; }
+        .feed-content { font-size: 14px; line-height: 1.5; color: #ddd; margin-bottom: 10px; }
+        .feed-tag {
+            display: inline-block;
+            font-size: 11px;
+            padding: 4px 10px;
+            background: rgba(0,0,255,0.2);
+            color: #8888ff;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Notification Badge */
+        .notif-badge {
+            position: absolute;
+            top: 4px;
+            right: 12px;
+            width: 8px;
+            height: 8px;
+            background: var(--primary-magenta);
+            border-radius: 50%;
+            animation: blink 2s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="phone-frame">
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <span>9:41</span>
+            <div class="status-icons">
+                <span>📶</span>
+                <span>🔋</span>
+            </div>
+        </div>
+
+        <!-- App Header -->
+        <div class="app-header">
+            <div class="header-title" id="header-title">Профиль</div>
+            <div class="header-icon">🔔</div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content-area">
+            
+            <!-- Profile Screen -->
+            <div class="screen active" id="screen-profile">
+                <div class="profile-header">
+                    <div class="avatar-large"></div>
+                    <div class="profile-name">Алексей В.</div>
+                    <div class="profile-level">Исследователь • Уровень 12</div>
+                </div>
+
+                <div class="xp-bar-container">
+                    <div class="xp-header">
+                        <span>Прогресс до уровня 13</span>
+                        <span id="xp-text">1,240 / 2,000 XP</span>
+                    </div>
+                    <div class="xp-progress">
+                        <div class="xp-fill" id="xp-fill"></div>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-val" id="xp-count">1,240</div>
+                        <div class="stat-label">Всего XP</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-val" id="quest-count">8</div>
+                        <div class="stat-label">Квестов</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-val">3</div>
+                        <div class="stat-label">Друзья рядом</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-val">15 км</div>
+                        <div class="stat-label">За неделю</div>
+                    </div>
+                </div>
+
+                <div class="section-title"> Достижения</div>
+                <div class="badge-card">
+                    <div class="badge-icon">🏃‍♂️</div>
+                    <div class="badge-info">
+                        <h4>Активный ходок</h4>
+                        <p>Пройдено 15 км за неделю</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Map Screen -->
+            <div class="screen" id="screen-map">
+                <div class="map-container">
+                    <div class="map-location">
+                        📍 Василеостровский район
+                    </div>
+
+                    <div class="map-pin" style="top: 25%; left: 35%;" onclick="activateQuest('jazz')">
+                        <span></span>
+                    </div>
+                    <div class="map-pin" style="top: 55%; left: 65%; background: linear-gradient(135deg, #ff00ff, #ff0055);" onclick="activateQuest('coffee')">
+                        <span>☕</span>
+                    </div>
+                    <div class="map-pin" style="top: 20%; left: 75%; background: linear-gradient(135deg, #00ffff, #0000ff);" onclick="activateQuest('art')">
+                        <span>🎨</span>
+                    </div>
+                    <div class="map-pin" style="top: 70%; left: 30%; background: linear-gradient(135deg, #00ff00, #0000ff);" onclick="activateQuest('park')">
+                        <span>🌳</span>
+                    </div>
+
+                    <div class="quest-modal" id="quest-modal">
+                        <h3 id="modal-title">Название квеста</h3>
+                        <p id="modal-desc">Описание задания...</p>
+                        <div class="quest-reward" id="modal-reward">+150 XP</div>
+                        <button class="btn btn-primary" onclick="completeQuest()">
+                            ✓ Я здесь! Выполнить
+                        </button>
+                        <button class="btn btn-secondary" onclick="closeQuest()">
+                            Отмена
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feed Screen -->
+            <div class="screen" id="screen-feed">
+                <div class="section-title">
+                    🔥 Лента действий
+                    <span style="font-size: 10px; background: var(--primary-blue); padding: 3px 8px; border-radius: 10px; color: white; margin-left: auto;">LIVE</span>
+                </div>
+                <div class="feed-list" id="feed-container">
+                    <div class="feed-item">
+                        <div class="feed-user">
+                            <div class="feed-avatar" style="background: #e91e63;">👩</div>
+                            <div class="feed-name">Мария К.</div>
+                            <div class="feed-time">2 мин</div>
+                        </div>
+                        <div class="feed-content">Нашла скрытый дворик на 8-й линии! Там потрясающий стрит-арт.</div>
+                        <div class="feed-tag">#Исследователь</div>
+                    </div>
+                    <div class="feed-item">
+                        <div class="feed-user">
+                            <div class="feed-avatar" style="background: #2196f3;">👨</div>
+                            <div class="feed-name">Дмитрий С.</div>
+                            <div class="feed-time">15 мин</div>
+                        </div>
+                        <div class="feed-content">Посетил лекцию по урбанистике в "Подвале". Очень полезно.</div>
+                        <div class="feed-tag">#Знания</div>
+                    </div>
+                    <div class="feed-item">
+                        <div class="feed-user">
+                            <div class="feed-avatar" style="background: #ff9800;">👩</div>
+                            <div class="feed-name">Анна В.</div>
+                            <div class="feed-time">32 мин</div>
+                        </div>
+                        <div class="feed-content">Собрала компанию для пробежки вокруг Смоленки. Было круто!</div>
+                        <div class="feed-tag">#Спорт</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="bottom-nav">
+            <div class="nav-item active" onclick="switchTab('profile')">
+                <div class="nav-icon">👤</div>
+                <div class="nav-label">Профиль</div>
+            </div>
+            <div class="nav-item" onclick="switchTab('map')">
+                <div class="nav-icon">️📌</div>
+                <div class="nav-label">Карта</div>
+                <div class="notif-badge"></div>
+            </div>
+            <div class="nav-item" onclick="switchTab('feed')">
+                <div class="nav-icon">📡</div>
+                <div class="nav-label">Лента</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Quest Data
+        const quests = {
+            'jazz': {
+                title: 'Джаз в подвале',
+                desc: 'Приди на Лиговский пр., 50. Найди вход во двор, спустись вниз. Покажи фото саксофона бармену.',
+                xp: 150
+            },
+            'coffee': {
+                title: 'Утренний раф',
+                desc: 'Кофейня "Зерно" на углу. Закажи новый сезонный раф и оставь честный отзыв в приложении до 12:00.',
+                xp: 100
+            },
+            'art': {
+                title: 'Поиск граффити',
+                desc: 'Найди мурал с изображением космонавта на стене дома 14. Сделай креативное фото на его фоне.',
+                xp: 200
+            },
+            'park': {
+                title: 'Утренняя пробежка',
+                desc: 'Пробеги 3 км по набережной Смоленки. Загрузи скриншот из фитнес-трекера.',
+                xp: 250
+            }
+        };
+
+        let currentQuestId = null;
+        let currentXp = 1240;
+        let questCount = 8;
+
+        // Tab Switching
+        function switchTab(tabName) {
+            // Update nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+
+            // Update screens
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(`screen-${tabName}`).classList.add('active');
+
+            // Update header title
+            const titles = {
+                'profile': 'Профиль',
+                'map': 'Карта заданий',
+                'feed': 'Лента действий'
+            };
+            document.getElementById('header-title').innerText = titles[tabName];
+        }
+
+        // Quest Functions
+        function activateQuest(id) {
+            currentQuestId = id;
+            const quest = quests[id];
+            const modal = document.getElementById('quest-modal');
+            
+            document.getElementById('modal-title').innerText = quest.title;
+            document.getElementById('modal-desc').innerText = quest.desc;
+            document.getElementById('modal-reward').innerText = `+${quest.xp} XP`;
+            
+            modal.classList.add('show');
+        }
+
+        function closeQuest() {
+            const modal = document.getElementById('quest-modal');
+            modal.classList.remove('show');
+            currentQuestId = null;
+        }
+
+        function completeQuest() {
+            if (!currentQuestId) return;
+            
+            const quest = quests[currentQuestId];
+            
+            // Update XP
+            currentXp += quest.xp;
+            questCount++;
+            
+            document.getElementById('xp-count').innerText = currentXp.toLocaleString();
+            document.getElementById('quest-count').innerText = questCount;
+            document.getElementById('xp-text').innerText = `${currentXp.toLocaleString()} / 2,000 XP`;
+            
+            const progressPercent = (currentXp / 2000) * 100;
+            document.getElementById('xp-fill').style.width = `${Math.min(progressPercent, 100)}%`;
+
+            // Add to feed
+            addFeedItem(quest);
+            
+            // Close modal
+            closeQuest();
+            
+            // Show notification
+            setTimeout(() => {
+                alert(`🎉 Квест выполнен! +${quest.xp} XP`);
+            }, 300);
+        }
+
+        function addFeedItem(questData) {
+            const container = document.getElementById('feed-container');
+            const newItem = document.createElement('div');
+            newItem.className = 'feed-item new';
+            
+            newItem.innerHTML = `
+                <div class="feed-user">
+                    <div class="feed-avatar" style="background: linear-gradient(135deg, #0000ff, #ff00ff);">👤</div>
+                    <div class="feed-name">Вы (Алексей)</div>
+                    <div class="feed-time">Только что</div>
+                </div>
+                <div class="feed-content">Выполнил квест: "${questData.title}". ${questData.desc.substring(0, 50)}...</div>
+                <div class="feed-tag" style="background: rgba(255,0,255,0.2); color: #ff88ff;">#Действие</div>
+            `;
+            
+            container.insertBefore(newItem, container.firstChild);
+            
+            setTimeout(() => {
+                newItem.classList.remove('new');
+            }, 1000);
+        }
+
+        // Simulate live feed updates
+        setInterval(() => {
+            if(Math.random() > 0.6) {
+                const names = ['Олег П.', 'Света М.', 'Иван К.', 'Лена Д.', 'Макс Р.'];
+                const actions = [
+                    'Нашел отличную книжную лавку.',
+                    'Покормил белок в парке.',
+                    'Посетил выставку современного искусства.',
+                    'Выпил лучший матча-латте в городе.',
+                    'Сходил на йогу в парк.'
+                ];
+                const tags = ['#Еда', '#Природа', '#Культура', '#Отдых', '#Спорт'];
+                const emojis = ['👨', '👩', '', '👱', ''];
+                
+                const randName = names[Math.floor(Math.random() * names.length)];
+                const randAction = actions[Math.floor(Math.random() * actions.length)];
+                const randTag = tags[Math.floor(Math.random() * tags.length)];
+                const randEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+                
+                const container = document.getElementById('feed-container');
+                const newItem = document.createElement('div');
+                newItem.className = 'feed-item new';
+                
+                newItem.innerHTML = `
+                    <div class="feed-user">
+                        <div class="feed-avatar" style="background: #666;">${randEmoji}</div>
+                        <div class="feed-name">${randName}</div>
+                        <div class="feed-time">Сейчас</div>
+                    </div>
+                    <div class="feed-content">${randAction}</div>
+                    <div class="feed-tag">${randTag}</div>
+                `;
+                
+                container.insertBefore(newItem, container.firstChild);
+                
+                if(container.children.length > 8) {
+                    container.removeChild(container.lastChild);
+                }
+                
+                setTimeout(() => newItem.classList.remove('new'), 1000);
+            }
+        }, 6000);
+    </script>
+</body>
+</html>
+
